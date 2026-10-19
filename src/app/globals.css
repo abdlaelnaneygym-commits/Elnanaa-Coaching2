@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+@theme {
+  --color-coal-950: #070708;
+  --color-coal-900: #0c0c0e;
+  --color-coal-850: #101013;
+  --color-coal-800: #15151a;
+  --color-coal-700: #1e1e25;
+  --color-coal-600: #2a2a33;
+
+  --color-gold-300: #f3cd82;
+  --color-gold-400: #e8b558;
+  --color-gold-500: #d9a441;
+  --color-gold-600: #b8862f;
+  --color-gold-700: #8f6823;
+
+  --color-bone: #f4efe5;
+
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-floaty: floaty 7s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 3.4s ease-in-out infinite;
+  --animate-spin-slow: spin 14s linear infinite;
+  --animate-shine: shine 2.8s ease-in-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  @keyframes shine {
+    0% { transform: translateX(220%) skewX(-18deg); }
+    100% { transform: translateX(-220%) skewX(-18deg); }
+  }
+}
+
+:root {
+  --font-head: var(--font-cairo), "Segoe UI", system-ui, sans-serif;
+}
+
+/* ===== منع التمرير الأفقي التسريبي على كل الشاشات ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-coal-950);
+  color: var(--color-bone);
+  font-family: var(--font-cairo), "Segoe UI", system-ui, sans-serif;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/*
+ * الصور لا تتجاوز حدود الشاشة.
+ * ملاحظة: لا نضع height:auto هنا لأن CSS غير المُصنَّف يتغلب على أدوات
+ * Tailwind (مثل h-full) وسيكسر الصور ذات الارتفاع المطلق.
+ */
+img,
+video {
+  max-width: 100%;
+}
+
+/* الحاوية القياسية المتجاوبة لكل الأقسام */
+.container-x {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  .container-x {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .container-x {
+    padding-inline: 2rem;
+  }
+}
+
+/*
+ * حماية إضافية للنوافذ المنبثقة على الشاشات الصغيرة.
+ * لا نضع max-width حتى لا يتغلب على sm:max-w-* الخاص بـ Tailwind.
+ */
+.modal-sheet {
+  width: 100%;
+  margin-inline: auto;
+}
+
+::selection {
+  background: var(--color-gold-500);
+  color: #131008;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0c0c0e;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#b8862f, #8f6823);
+  border-radius: 999px;
+  border: 2px solid #0c0c0e;
+}
+
+/* ===== زخارف ===== */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(232, 181, 88, 0.4);
+}
+.text-outline-faint {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.12);
+}
+
+.noise-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(18px);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(120deg, #f3cd82 0%, #e8b558 35%, #b8862f 70%, #f3cd82 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ظل نصي خفيف: يضمن وضوح العناوين فوق الصورة بدون تعتيم الطبقات أكثر */
+.text-shadow-soft {
+  text-shadow:
+    0 2px 22px rgba(0, 0, 0, 0.6),
+    0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+/* عناصر النماذج */
+.field {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.8rem 1.1rem;
+  font-size: 0.925rem;
+  color: var(--color-bone);
+  outline: none;
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.field::placeholder {
+  color: rgba(244, 239, 229, 0.35);
+}
+.field:focus {
+  border-color: rgba(217, 164, 65, 0.65);
+  background: rgba(217, 164, 65, 0.05);
+  box-shadow: 0 0 0 4px rgba(217, 164, 65, 0.12);
+}
+select.field option {
+  background: #131316;
+  color: #f4efe5;
+}
+
+/* خط مائل زخرفي للأقسام */
+.section-frame {
+  position: relative;
+}
+.section-frame::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 64px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e8b558, transparent);
+}
+
+/* شريط لامع فوق الأزرار الذهبية */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: translateX(220%) skewX(-18deg);
+  animation: shine 3s ease-in-out infinite;
+}
