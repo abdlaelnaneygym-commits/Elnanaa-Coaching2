@@ -124,26 +124,30 @@ git push -u origin main
    - `COACH_PIN` = الرمز السري الجديد
 6. اضغط **Deploy** ✅
 
-### 4️⃣ أنشئ الجداول في قاعدة بيانات الإنتاج
-من جهازك المحلي، عدّل `drizzle.config.json` ليشير لقاعدة الإنتاج:
+### 4️⃣ أنشئ الجداول في قاعدة بيانات الإنتاج (Neon)
+المشروع يستخدم **Drizzle ORM** (وليس Prisma) — طبّق الجداول بأمر واحد
+يقرأ الرابط من متغير البيئة `DATABASE_URL`:
 
-```json
-{
-  "dialect": "postgresql",
-  "schema": "./src/db/schema.ts",
-  "dbCredentials": {
-    "url": "postgresql://رابط-الإنتاج-هنا"
-  }
-}
+من جهازك، نفّذ هذا الأمر مع رابط Neon الخاص بك:
+
+```bash
+DATABASE_URL="postgresql://USER:PASS@HOST/neondb?sslmode=require" npx drizzle-kit push
 ```
 
-ثم نفّذ:
+أو ضع نفس الرابط في ملف `.env` ثم نفّذ:
 
 ```bash
 npx drizzle-kit push
 ```
 
-> ⚠️ أعد `drizzle.config.json` للقيمة المحلية بعد الانتهاء حتى لا ترفعه لـ GitHub.
+حيث يقرأ `drizzle.config.ts` قيمته من `process.env.DATABASE_URL` تلقائياً.
+
+> 📍 **أين أجد الرابط؟** لوحة Neon ← مشروعك ← Connection Details ← انسخ
+> الـ Connection String. (أو من Vercel ← مشروعك ← Settings ← Environment
+> Variables ← قيمة `DATABASE_URL`).
+
+سيُنشئ هذا الأمر جداول: `settings`، `calculations`، `subscriptions`،
+`foods`، `exercises`، `transformations`، `diet_plans`، `workout_plans`.
 
 ### 5️⃣ افتح موقعك لايف 🎉
 ```
