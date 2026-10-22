@@ -292,7 +292,7 @@ function DashboardShell({
           onPinChanged={onPinChanged}
         />
       )}
-      {section === "hero" && <HeroManager />}
+      {section === "hero" && <HeroManager headers={headers} />}
     </DashboardFrame>
   );
 }

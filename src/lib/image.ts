@@ -54,6 +54,4 @@ export function dataUrlToBlob(dataUrl: string): Blob {
   return new Blob([arr], { type: mime });
 }
 
-export const HERO_STORAGE_KEY = "elnanaa_hero_image_v1";
-export const HERO_UPDATED_EVENT = "elnanaa:hero-updated";
 export const COACH_PIN_KEY = "elnanaa_coach_pin";

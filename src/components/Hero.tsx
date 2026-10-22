@@ -1,9 +1,7 @@
 "use client";
 
-import { HERO_STORAGE_KEY, HERO_UPDATED_EVENT } from "@/lib/image";
 import { motion } from "framer-motion";
 import { ArrowLeft, ChevronDown, Flame, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
 
 const DEFAULT_HERO = "/images/hero-coach.jpg";
 
@@ -14,30 +12,20 @@ const STATS = [
   { value: "24/7", label: "متابعة مستمرة" },
 ];
 
-export default function Hero() {
-  const [heroImage, setHeroImage] = useState(DEFAULT_HERO);
-
-  useEffect(() => {
-    const read = () => {
-      const saved = window.localStorage.getItem(HERO_STORAGE_KEY);
-      setHeroImage(saved || DEFAULT_HERO);
-    };
-    read();
-    window.addEventListener("storage", read);
-    window.addEventListener(HERO_UPDATED_EVENT, read);
-    return () => {
-      window.removeEventListener("storage", read);
-      window.removeEventListener(HERO_UPDATED_EVENT, read);
-    };
-  }, []);
+/**
+ * صورة الواجهة تُقرأ من جدول settings في قاعدة البيانات (Neon) على الخادم،
+ * وتُمرر للمكوّن كخاصية — Fallback للصورة الافتراضية عند عدم وجود صورة مخصصة.
+ */
+export default function Hero({ heroImage }: { heroImage?: string }) {
+  const src = heroImage && heroImage.length > 0 ? heroImage : DEFAULT_HERO;
 
   return (
     <section id="home" className="relative flex min-h-svh flex-col overflow-hidden">
       {/* صورة الكابتن — عرض طبيعي كامل بدون تشويه */}
       <div className="absolute inset-0">
         <motion.img
-          key={heroImage.slice(0, 64)}
-          src={heroImage}
+          key={`${src.length}-${src.slice(0, 52)}`}
+          src={src}
           alt="الكابتن عبد الله النعناع — Elnanaa Coaching"
           className="h-full w-full object-cover object-center"
           initial={{ scale: 1.12, opacity: 0 }}
