@@ -239,9 +239,9 @@ export default function WorkoutBuilder({
                       {day.entries.map((entry, index) => (
                         <div
                           key={`${day.id}-${index}`}
-                          className="flex flex-wrap items-center gap-2.5 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-3 sm:gap-3 sm:px-4"
+                          className="flex flex-col gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] px-3 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:px-4 sm:py-3"
                         >
-                          <span className="w-5 shrink-0 text-center text-[11px] font-black text-bone/35">
+                          <span className="hidden w-5 shrink-0 text-center text-[11px] font-black text-bone/35 sm:block">
                             {index + 1}
                           </span>
                           <span className="w-full min-w-0 flex-1 sm:w-auto sm:min-w-32">
@@ -250,7 +250,7 @@ export default function WorkoutBuilder({
                               {entry.muscleGroup}
                             </span>
                           </span>
-                          <div className="w-24 shrink-0 sm:w-28">
+                          <div className="min-w-0 flex-1">
                             <span className="mb-1 block text-center text-[9px] font-bold text-bone/40">
                               المجموعات
                             </span>
@@ -262,7 +262,7 @@ export default function WorkoutBuilder({
                               max={10}
                             />
                           </div>
-                          <div className="w-24 shrink-0 sm:w-32">
+                          <div className="min-w-0 flex-1">
                             <span className="mb-1 block text-center text-[9px] font-bold text-bone/40">
                               التكرارات
                             </span>

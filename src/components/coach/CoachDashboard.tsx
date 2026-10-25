@@ -382,7 +382,7 @@ function DashboardFrame({
       </aside>
 
       {/* المحتوى */}
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <main className="min-w-0 flex-1 px-4 pb-28 pt-6 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8 lg:pb-16 lg:pt-10">
         <div className="mx-auto max-w-6xl">
           <div className="mb-6 flex items-center justify-between gap-3 lg:hidden">
             <h1 className="text-lg font-black">{activeLabel}</h1>

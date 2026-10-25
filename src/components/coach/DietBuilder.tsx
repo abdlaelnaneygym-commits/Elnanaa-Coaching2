@@ -460,12 +460,12 @@ export default function DietBuilder({
                                 return (
                                   <div
                                     key={`${option.id}-${index}`}
-                                    className="flex flex-wrap items-center gap-2 rounded-xl border border-white/[0.06] bg-coal-950/40 px-3 py-2.5 sm:gap-3"
+                                    className="flex flex-col gap-2.5 rounded-xl border border-white/[0.06] bg-coal-950/40 px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:py-2.5"
                                   >
                                     <span className="w-full min-w-0 flex-1 text-xs font-extrabold sm:w-auto sm:text-sm">
                                       {item.name}
                                     </span>
-                                    <div className="w-full sm:w-40">
+                                    <div className="w-full sm:w-44">
                                       <Stepper
                                         value={item.grams}
                                         onChange={(v) => updateItemGrams(meal.id, option.id, index, v)}
