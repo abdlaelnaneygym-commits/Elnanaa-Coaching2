@@ -1,7 +1,15 @@
 "use client";
 
 import type { DietPlanRow, WorkoutPlanRow } from "@/db/schema";
-import { computeTotals, countWorkoutSets, dietPlanText, workoutPlanText } from "@/lib/plans";
+import {
+  computeTotals,
+  countWorkoutSets,
+  dietPlanText,
+  mealOptions,
+  OPTION_ALERT,
+  optionTotals,
+  workoutPlanText,
+} from "@/lib/plans";
 import {
   CalendarDays,
   Check,
@@ -142,33 +150,63 @@ export default function PlansView({
                       </div>
 
                       <div className="mt-4 space-y-3">
-                        {plan.meals.map((meal, mi) => (
-                          <div key={mi} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
-                            <div className="flex items-center justify-between gap-2">
-                              <h4 className="text-sm font-extrabold text-gold-300">{meal.name}</h4>
-                              <span className="text-[10px] font-black text-bone/45">
-                                {computeTotals([meal]).calories} سعر
-                              </span>
+                        {plan.meals.map((meal, mi) => {
+                          const options = mealOptions(meal);
+                          const multi = options.length > 1;
+                          return (
+                            <div key={mi} className="rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4">
+                              <div className="flex items-center justify-between gap-2">
+                                <h4 className="text-sm font-extrabold text-gold-300">{meal.name}</h4>
+                                {multi && (
+                                  <span className="rounded-full bg-gold-500/15 px-2.5 py-1 text-[9px] font-black text-gold-300">
+                                    {options.length} خيارات بديلة
+                                  </span>
+                                )}
+                              </div>
+                              <div className={`mt-2.5 space-y-3 ${multi ? "" : ""}`}>
+                                {options.map((option) => {
+                                  const ot = optionTotals(option);
+                                  return (
+                                    <div key={option.id} className={multi ? "rounded-xl border border-white/[0.06] bg-coal-950/40 p-3" : ""}>
+                                      {multi && (
+                                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                                          <span className="text-xs font-black text-bone">{option.name}</span>
+                                          <span className="text-[10px] font-black text-gold-300/90">
+                                            {ot.calories} سعر • ب {ot.protein} • ك {ot.carbs} • د {ot.fats}
+                                          </span>
+                                        </div>
+                                      )}
+                                      {option.items.length > 0 ? (
+                                        <ul className="space-y-1.5">
+                                          {option.items.map((item, ii) => (
+                                            <li
+                                              key={ii}
+                                              className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-bone/60"
+                                            >
+                                              <span className="font-bold text-bone/80">
+                                                {item.name} — {item.grams} جم
+                                              </span>
+                                              <span className="font-black text-gold-300/80">
+                                                {Math.round((item.kcal * item.grams) / 100)} سعر
+                                              </span>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <p className="text-[10px] text-bone/35">لا أصناف</p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {multi && (
+                                <div className="mt-3 rounded-xl border border-gold-500/25 bg-gold-500/[0.06] px-3 py-2 text-center text-[10px] font-black text-gold-200">
+                                  {OPTION_ALERT}
+                                </div>
+                              )}
                             </div>
-                            {meal.items.length > 0 && (
-                              <ul className="mt-2.5 space-y-1.5">
-                                {meal.items.map((item, ii) => (
-                                  <li
-                                    key={ii}
-                                    className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-bone/60"
-                                  >
-                                    <span className="font-bold text-bone/80">
-                                      {item.name} — {item.grams} جم
-                                    </span>
-                                    <span className="font-black text-gold-300/80">
-                                      {Math.round((item.kcal * item.grams) / 100)} سعر
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       {plan.notes && (

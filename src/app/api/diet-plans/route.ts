@@ -7,22 +7,37 @@ import { desc } from "drizzle-orm";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function validItems(items: unknown): items is Meal["items"] {
+  if (!Array.isArray(items)) return false;
+  return items.every((item: unknown) => {
+    if (!item || typeof item !== "object") return false;
+    const it = item as Partial<Meal["items"][number]>;
+    return (
+      typeof it.name === "string" &&
+      typeof it.grams === "number" &&
+      Number.isFinite(it.grams) &&
+      it.grams > 0
+    );
+  });
+}
+
+/** وجبات صالحة — تدعم خيارات بديلة: items مباشرة أو options[{items}] */
 function validMeals(meals: unknown): meals is Meal[] {
   if (!Array.isArray(meals) || meals.length === 0) return false;
   return meals.every((meal: unknown) => {
     if (!meal || typeof meal !== "object") return false;
     const m = meal as Partial<Meal>;
-    if (typeof m.name !== "string" || !Array.isArray(m.items)) return false;
-    return m.items.every((item: unknown) => {
-      if (!item || typeof item !== "object") return false;
-      const it = item as Partial<Meal["items"][number]>;
-      return (
-        typeof it.name === "string" &&
-        typeof it.grams === "number" &&
-        Number.isFinite(it.grams) &&
-        it.grams > 0
+    if (typeof m.name !== "string") return false;
+    // صيغة الخيارات البديلة
+    if (Array.isArray(m.options) && m.options.length > 0) {
+      return m.options.every(
+        (opt) =>
+          opt && typeof opt === "object" && typeof opt.name === "string" && validItems(opt.items),
       );
-    });
+    }
+    // الصيغة المباشرة (توافق قديم)
+    if (!Array.isArray(m.items)) return false;
+    return validItems(m.items);
   });
 }
 

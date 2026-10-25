@@ -160,7 +160,7 @@ export default function Registration() {
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="text-[11px] font-black tracking-[0.25em] text-gold-400 sm:text-xs sm:tracking-[0.35em]">
-            04 — نموذج الاشتراك
+            05 — نموذج الاشتراك
           </span>
           <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-5 sm:text-4xl lg:text-5xl xl:text-6xl">
             سجّل بياناتك و<span className="gold-gradient-text">ابدأ اليوم</span>

@@ -70,12 +70,37 @@ export const subscriptions = pgTable("subscriptions", {
 export const foods = pgTable("foods", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  nameEn: text("name_en"),
   category: text("category").notNull(),
   kcal: real("kcal").notNull(),
   protein: real("protein").notNull(),
   carbs: real("carbs").notNull(),
   fats: real("fats").notNull(),
+  fiber: real("fiber").notNull().default(0),
+  state: text("state"), // raw | cooked | drained |
+  notes: text("notes"),
   isCustom: boolean("is_custom").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+/** كتاب الوصفات الدايت — وجبات كاملة بمكوناتها وقيمها الغذائية */
+export const recipes = pgTable("recipes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  nameEn: text("name_en"),
+  category: text("category").notNull(), // إفطار | غداء | عشاء | سناك | حلويات دايت
+  ingredients: jsonb("ingredients")
+    .$type<Array<{ name: string; grams: number; note?: string }>>()
+    .notNull(),
+  steps: text("steps"),
+  calories: real("calories").notNull(),
+  protein: real("protein").notNull(),
+  carbs: real("carbs").notNull(),
+  fats: real("fats").notNull(),
+  fiber: real("fiber").notNull().default(0),
+  image: text("image"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -144,6 +169,7 @@ export const workoutPlans = pgTable("workout_plans", {
 });
 
 export type SettingRow = typeof settings.$inferSelect;
+export type RecipeRow = typeof recipes.$inferSelect;
 export type CalculationRow = typeof calculations.$inferSelect;
 export type SubscriptionRow = typeof subscriptions.$inferSelect;
 export type FoodRow = typeof foods.$inferSelect;

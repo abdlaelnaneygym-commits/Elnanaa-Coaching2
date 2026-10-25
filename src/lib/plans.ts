@@ -11,10 +11,64 @@ export interface DietItem {
   fats: number;
 }
 
-export interface Meal {
+/** خيار بديل داخل الوجبة — كل خيار وجبة كاملة مستقلة */
+export interface DietOption {
   id: string;
   name: string;
   items: DietItem[];
+}
+
+export interface Meal {
+  id: string;
+  name: string;
+  /** الأصناف — تُستخدم مباشرة في الأنظمة القديمة (توافق تدريجي)،
+   *  أو كخيار أول مضغوط عند غياب options */
+  items: DietItem[];
+  /** الخيارات البديلة للوجبة (اختيارية) */
+  options?: DietOption[];
+}
+
+/** تنبيه ثابت يظهر أسفل الوجبة متعددة الخيارات */
+export const OPTION_ALERT =
+  "💡 تنبيه: اختر خياراً واحداً فقط من ضمن الخيارات المتاحة لهذه الوجبة.";
+
+/** التسمية تلقائياً: الخيار الأول، الثاني، الثالث... */
+export function optionLabel(index: number): string {
+  const ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس"];
+  return ordinals[index] ? `الخيار ${ordinals[index]}` : `الخيار ${index + 1}`;
+}
+
+/** الخيارات الفعلية للوجبة — يعيد options إن وجدت، وإلا يغلّف items كخيار واحد (توافق) */
+export function mealOptions(meal: Meal): DietOption[] {
+  if (meal.options && meal.options.length > 0) return meal.options;
+  return [{ id: `${meal.id}-single`, name: "الخيار الأول", items: meal.items ?? [] }];
+}
+
+/** إجماليات مصفوفة أصناف — غير مقرّبة داخلياً */
+export function itemsTotals(items: DietItem[]): Totals {
+  const t = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+  for (const item of items) {
+    const f = item.grams / 100;
+    t.calories += item.kcal * f;
+    t.protein += item.protein * f;
+    t.carbs += item.carbs * f;
+    t.fats += item.fats * f;
+  }
+  return t;
+}
+
+/** إجماليات خيار واحد (مقرّبة للعرض) */
+export function optionTotals(option: DietOption): Totals {
+  return roundTotals(itemsTotals(option.items));
+}
+
+function roundTotals(t: Totals): Totals {
+  return {
+    calories: Math.round(t.calories),
+    protein: Math.round(t.protein),
+    carbs: Math.round(t.carbs),
+    fats: Math.round(t.fats),
+  };
 }
 
 export interface Totals {
@@ -90,10 +144,15 @@ export function itemTotals(item: DietItem): Totals {
   };
 }
 
+/**
+ * إجمالي اليوم: الخيارات البديلة اختيارات متبادلة — لا تُجمع معاً.
+ * يُستخدم الخيار الأول (في ترتيب الخيارات) كمرجع احتسابي لكل وجبة.
+ */
 export function computeTotals(meals: Meal[]): Totals {
   const totals: Totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
   for (const meal of meals) {
-    for (const item of meal.items) {
+    const ref = mealOptions(meal)[0];
+    for (const item of ref.items) {
       const t = itemTotals(item);
       totals.calories += t.calories;
       totals.protein += t.protein;
@@ -110,7 +169,23 @@ export function computeTotals(meals: Meal[]): Totals {
 }
 
 export function mealTotals(meal: Meal): Totals {
-  return computeTotals([meal]);
+  return optionTotals(mealOptions(meal)[0]);
+}
+
+/** الطاقة المحسوبة من الماكروز وفق معادلة 4/4/9 */
+export function macroEnergy(protein: number, carbs: number, fats: number): number {
+  return Math.round(protein * 4 + carbs * 4 + fats * 9);
+}
+
+/**
+ * تحقّق اتساق: الفرق بين سعرات الأصناف المسجلة والطاقة المحسوبة من الماكروز.
+ * يرجع العبارة التحذيرية أو null عند التطابق المعقول (هامش 60 سعرة).
+ */
+export function macroConsistencyWarning(totals: Totals): string | null {
+  const energy = macroEnergy(totals.protein, totals.carbs, totals.fats);
+  const diff = Math.round(totals.calories - energy);
+  if (Math.abs(diff) <= 60) return null;
+  return `⚠️ تنبيه للمراجعة: السعرات المسجلة من الأصناف (${totals.calories}) تختلف عن المحسوبة من الماكروز (${energy}) بمقدار ${Math.abs(diff)} سعر — راجع بيانات الأصناف.`;
 }
 
 export function countWorkoutSets(days: WorkoutDay[]): number {
@@ -129,7 +204,7 @@ export function resolveUpload(name: string | null | undefined): string {
   return `/api/uploads/${encodeURIComponent(name)}`;
 }
 
-/** نص جاهز للإرسال للعميل — النظام الغذائي */
+/** نص جاهز للإرسال للعميل — النظام الغذائي (بدعم الخيارات البديلة) */
 export function dietPlanText(plan: {
   clientName: string;
   targetCalories: number;
@@ -139,17 +214,27 @@ export function dietPlanText(plan: {
   const lines: string[] = [
     `النظام الغذائي — ${plan.clientName}`,
     `السعرات المستهدفة: ${plan.targetCalories} سعر`,
-    `الإجمالي الفعلي: ${totals.calories} سعر (بروتين ${totals.protein} جم / كربوهيدرات ${totals.carbs} جم / دهون ${totals.fats} جم)`,
+    `الإجمالي اليومي (بالخيار الأول من كل وجبة): ${totals.calories} سعر`,
+    `بروتين ${totals.protein} جم / كربوهيدرات ${totals.carbs} جم / دهون ${totals.fats} جم`,
     "",
   ];
   for (const meal of plan.meals) {
-    const mt = mealTotals(meal);
-    lines.push(`▸ ${meal.name} — ${mt.calories} سعر`);
-    for (const item of meal.items) {
-      const it = itemTotals(item);
-      lines.push(
-        `   • ${item.name}: ${item.grams} جم (${Math.round(it.calories)} سعر / ب ${Math.round(it.protein)} / ك ${Math.round(it.carbs)} / د ${Math.round(it.fats)})`,
-      );
+    const options = mealOptions(meal);
+    lines.push(`▸ ${meal.name}`);
+    for (let oi = 0; oi < options.length; oi++) {
+      const option = options[oi];
+      const ot = optionTotals(option);
+      const prefix = options.length > 1 ? `   ${option.name} — ${ot.calories} سعر (ب ${ot.protein} / ك ${ot.carbs} / د ${ot.fats}):` : `   ${ot.calories} سعر (ب ${ot.protein} / ك ${ot.carbs} / د ${ot.fats}):`;
+      lines.push(prefix);
+      for (const item of option.items) {
+        const it = itemTotals(item);
+        lines.push(
+          `      • ${item.name}: ${item.grams} جم — ${Math.round(it.calories)} سعر / ب ${Math.round(it.protein)} / ك ${Math.round(it.carbs)} / د ${Math.round(it.fats)}`,
+        );
+      }
+    }
+    if (options.length > 1) {
+      lines.push(`   ${OPTION_ALERT}`);
     }
     lines.push("");
   }

@@ -8,6 +8,7 @@
 
 export type Gender = "male" | "female";
 export type Goal = "lose" | "maintain" | "gain";
+export type EquationKey = "mifflin" | "katch";
 export type ActivityKey =
   | "sedentary"
   | "light"
@@ -22,6 +23,10 @@ export interface CalcInput {
   height: number; // سم
   activityLevel: ActivityKey;
   goal: Goal;
+  /** معادلة الاختيار للبالغين: mifflin (افتراضي) أو katch */
+  equation?: EquationKey;
+  /** نسبة الدهون % — إلزامية عند اختيار Katch-McArdle */
+  bodyFat?: number | null;
 }
 
 export interface CalcResult {
@@ -29,10 +34,16 @@ export interface CalcResult {
   tdee: number;
   bmi: number;
   isChild: boolean;
-  equation: "mifflin" | "schofield";
+  equation: "mifflin" | "schofield" | "katch";
   /** null عندما تُحال الحالة لأخصائي تغذية أطفال */
   targetCalories: number | null;
   needsSpecialist: boolean;
+  /** الكتلة الخالية من الدهون (عند Katch-McArdle) */
+  leanMass?: number;
+  /** مقدار العجز/الفائض الحراري مقارنة بـ TDEE (سالب = عجز) */
+  delta?: number | null;
+  /** معامل النشاط المُستخدم */
+  activityFactor: number;
 }
 
 export const ACTIVITY_FACTORS: Record<ActivityKey, number> = {
@@ -85,23 +96,60 @@ function mifflinBMR(
   return gender === "male" ? base + 5 : base - 161;
 }
 
+/** Katch-McArdle — يحتاج نسبة الدهون لحساب الكتلة الخالية من الدهون */
+function katchBMR(weightKg: number, bodyFatPct: number): { bmr: number; leanMass: number } {
+  const leanMass = weightKg * (1 - bodyFatPct / 100);
+  return { bmr: 370 + 21.6 * leanMass, leanMass };
+}
+
+export const EQUATION_LABELS: Record<CalcResult["equation"], string> = {
+  mifflin: "Mifflin-St Jeor",
+  katch: "Katch-McArdle",
+  schofield: "Schofield (معادلات الأطفال المعتمدة)",
+};
+
 export function assessCalories(input: CalcInput): CalcResult {
   const { age, gender, weight, height, activityLevel, goal } = input;
   const isChild = age < 18;
-  const equation = isChild ? "schofield" : "mifflin";
+  const factor = ACTIVITY_FACTORS[activityLevel];
 
-  const rawBmr = isChild
-    ? schofieldBMR(age, gender, weight, height / 100)
-    : mifflinBMR(age, gender, weight, height);
+  // الأطفال والمراهقون: معادلات الأطفال دائماً (لا تُستخدم Katch أو Mifflin معهم)
+  let equation: CalcResult["equation"];
+  let rawBmr: number;
+  let leanMass: number | undefined;
+
+  if (isChild) {
+    equation = "schofield";
+    rawBmr = schofieldBMR(age, gender, weight, height / 100);
+  } else if (input.equation === "katch" && typeof input.bodyFat === "number" && Number.isFinite(input.bodyFat)) {
+    equation = "katch";
+    const k = katchBMR(weight, input.bodyFat);
+    rawBmr = k.bmr;
+    leanMass = Math.round(k.leanMass * 10) / 10;
+  } else {
+    equation = "mifflin";
+    rawBmr = mifflinBMR(age, gender, weight, height);
+  }
 
   const bmr = Math.round(rawBmr);
-  const tdee = Math.round(rawBmr * ACTIVITY_FACTORS[activityLevel]);
+  const tdee = Math.round(rawBmr * factor);
   const bmi = Math.round((weight / Math.pow(height / 100, 2)) * 10) / 10;
 
   // القاعدة الذهبية: طفل يحتاج تخسيس => منع الخطة التلقائية نهائياً
   const needsSpecialist = isChild && goal === "lose";
   if (needsSpecialist) {
-    return { bmr, tdee, bmi, isChild, equation, targetCalories: null, needsSpecialist };
+    return {
+      bmr,
+      tdee,
+      bmi,
+      isChild,
+      equation,
+      targetCalories: null,
+      needsSpecialist,
+      delta: null,
+      activityFactor: factor,
+      leanMass,
+    };
   }
 
   let target: number;
@@ -115,14 +163,18 @@ export function assessCalories(input: CalcInput): CalcResult {
     target = tdee;
   }
 
+  const rounded = Math.round(target);
   return {
     bmr,
     tdee,
     bmi,
     isChild,
     equation,
-    targetCalories: Math.round(target),
+    targetCalories: rounded,
     needsSpecialist,
+    delta: rounded - tdee,
+    activityFactor: factor,
+    leanMass,
   };
 }
 
@@ -170,6 +222,11 @@ export function validateCalcPayload(body: unknown):
   const gender = b.gender === "female" ? "female" : "male";
   const activityLevel = String(b.activityLevel) as ActivityKey;
   const goal = String(b.goal) as Goal;
+  const equation = b.equation === "katch" ? "katch" : "mifflin";
+  const bodyFat =
+    b.bodyFat === undefined || b.bodyFat === null || b.bodyFat === ""
+      ? null
+      : Number(b.bodyFat);
 
   if (name.length < 2 || name.length > 100)
     return { ok: false, error: "برجاء إدخال اسم صحيح" };
@@ -184,8 +241,34 @@ export function validateCalcPayload(body: unknown):
   if (!["lose", "maintain", "gain"].includes(goal))
     return { ok: false, error: "برجاء اختيار الهدف" };
 
+  // Katch-McArdle — لا تُستخدم بدون نسبة دهون (للبالغين)
+  if (equation === "katch" && age >= 18) {
+    if (bodyFat === null || !Number.isFinite(bodyFat)) {
+      return {
+        ok: false,
+        error: "معادلة Katch-McArdle تتطلب إدخال نسبة الدهون في الجسم",
+      };
+    }
+    if (bodyFat < 0 || bodyFat > 100) {
+      return {
+        ok: false,
+        error: "نسبة الدهون يجب أن تكون بين 0% و 100%",
+      };
+    }
+  }
+
   return {
     ok: true,
-    data: { name, age: Math.round(age), weight, height, gender, activityLevel, goal },
+    data: {
+      name,
+      age: Math.round(age),
+      weight,
+      height,
+      gender,
+      activityLevel,
+      goal,
+      equation,
+      bodyFat,
+    },
   };
 }

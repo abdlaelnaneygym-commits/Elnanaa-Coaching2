@@ -135,6 +135,130 @@ export const FOOD_SEED: FoodSeed[] = [
 /** [الاسم، مجموعة العضلات] */
 export type ExerciseSeed = [string, string];
 
+/* ================== توسعة مكتبة الأطعمة (V2) ================== */
+export interface FoodExtra {
+  name: string;
+  nameEn: string;
+  category: string;
+  kcal: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  fiber: number;
+  state: string; // نيئ | مطبوخ | مصفّى
+  notes?: string;
+}
+
+/** أصناف مصرية وعربية ورياضية إضافية — لكل 100 جم (nm = نيئ، mp = مطبوخ) */
+export const FOOD_SEED_EXTRA: FoodExtra[] = [
+  // لحوم ودواجن وأسماك
+  { name: "صدر ديك رومي", nameEn: "Turkey Breast", category: "بروتين", kcal: 104, protein: 22, carbs: 0, fats: 1, fiber: 0, state: "مطبوخ" },
+  { name: "سمك بوري مشوي", nameEn: "Sea Bass Grilled", category: "بروتين", kcal: 124, protein: 24, carbs: 0, fats: 2.6, fiber: 0, state: "مطبوخ" },
+  { name: "سمك قشر بياض", nameEn: "Nile Perch", category: "بروتين", kcal: 100, protein: 22, carbs: 0, fats: 1.2, fiber: 0, state: "مطبوخ" },
+  { name: "سجق بلدي", nameEn: "Egyptian Sujuk", category: "بروتين", kcal: 320, protein: 15, carbs: 1, fats: 28, fiber: 0, state: "نيئ", notes: "يُطهى بالكامل قبل الأكل" },
+  // بقوليات
+  { name: "فاصوليا بيضاء مطبوخة", nameEn: "White Beans", category: "بروتين", kcal: 139, protein: 9.7, carbs: 25, fats: 0.4, fiber: 6.3, state: "مطبوخ" },
+  { name: "فاصوليا حمراء مطبوخة", nameEn: "Red Kidney Beans", category: "بروتين", kcal: 127, protein: 8.7, carbs: 22.8, fats: 0.5, fiber: 6.4, state: "مطبوخ" },
+  { name: "لوبيا بلدي مطبوخة", nameEn: "Black-eyed Peas", category: "بروتين", kcal: 116, protein: 7.7, carbs: 21, fats: 0.5, fiber: 6, state: "مطبوخ" },
+  { name: "إدامame (فول الصويا الأخضر)", nameEn: "Edamame", category: "بروتين", kcal: 122, protein: 11, carbs: 9, fats: 5, fiber: 5, state: "مطبوخ" },
+  // كربوهيدرات
+  { name: "أرز برياني/كابسه", nameEn: "Kabsa Rice", category: "كربوهيدرات", kcal: 165, protein: 3.5, carbs: 32, fats: 2, fiber: 0.8, state: "مطبوخ" },
+  { name: "عيش فينو", nameEn: "Fino Bread", category: "كربوهيدرات", kcal: 270, protein: 8, carbs: 52, fats: 2.5, fiber: 2.5, state: "مطبوخ" },
+  { name: "بقسماط", nameEn: "Rusks", category: "كربوهيدرات", kcal: 392, protein: 11, carbs: 72, fats: 6, fiber: 4, state: "نيئ" },
+  { name: "رقاق مصري", nameEn: "Egyptian Raqaq", category: "كربوهيدرات", kcal: 350, protein: 9, carbs: 74, fats: 1.5, fiber: 2.5, state: "نيئ" },
+  { name: "بطاطا حلوة نيئة", nameEn: "Sweet Potato Raw", category: "كربوهيدرات", kcal: 86, protein: 1.6, carbs: 20, fats: 0.1, fiber: 3, state: "نيئ" },
+  // ألبان
+  { name: "حليب سادة قليل الدسم", nameEn: "Low-fat Milk", category: "ألبان", kcal: 42, protein: 3.4, carbs: 5, fats: 1, fiber: 0, state: "نيئ" },
+  { name: "جبنة بارميزان", nameEn: "Parmesan", category: "ألبان", kcal: 431, protein: 38, carbs: 4.1, fats: 29, fiber: 0, state: "نيئ" },
+  { name: "جبنة فيتا", nameEn: "Feta Cheese", category: "ألبان", kcal: 264, protein: 14, carbs: 4.1, fats: 21, fiber: 0, state: "نيئ" },
+  // فاكهة
+  { name: "ماندورا (برتقال صغير)", nameEn: "Mandarin", category: "فواكه", kcal: 44, protein: 0.8, carbs: 11, fats: 0.2, fiber: 1.8, state: "نيئ" },
+  { name: "تين أخضر", nameEn: "Green Figs", category: "فواكه", kcal: 74, protein: 0.8, carbs: 19, fats: 0.3, fiber: 2.9, state: "نيئ" },
+  { name: "رمان", nameEn: "Pomegranate", category: "فواكه", kcal: 83, protein: 1.7, carbs: 19, fats: 1.2, fiber: 4, state: "نيئ" },
+  // دهون صحية
+  { name: "بذور الشيا", nameEn: "Chia Seeds", category: "دهون ومكسرات", kcal: 486, protein: 17, carbs: 42, fats: 31, fiber: 34, state: "نيئ" },
+  { name: "بذور الكتان المطحونة", nameEn: "Ground Flaxseed", category: "دهون ومكسرات", kcal: 534, protein: 18, carbs: 29, fats: 42, fiber: 27, state: "نيئ" },
+  { name: "زيت جوز الهند", nameEn: "Coconut Oil", category: "دهون ومكسرات", kcal: 862, protein: 0, carbs: 0, fats: 100, fiber: 0, state: "نيئ" },
+  // منتجات رياضية
+  { name: "كازين بروتين (كازين)", nameEn: "Casein Protein", category: "أخرى", kcal: 370, protein: 80, carbs: 6, fats: 3, fiber: 0, state: "نيئ", notes: "ليلاً قبل النوم — امتصاص بطيء" },
+  { name: "مياه نبع غازية", nameEn: "Sparkling Water", category: "أخرى", kcal: 0, protein: 0, carbs: 0, fats: 0, fiber: 0, state: "نيئ" },
+  { name: "قهوة أمريكانو بدون سكر", nameEn: "Americano", category: "أخرى", kcal: 2, protein: 0.1, carbs: 0.3, fats: 0, fiber: 0, state: "نيئ" },
+];
+
+/* ================== كتاب الوصفات الدايت (الأولية) ================== */
+export interface RecipeSeed {
+  name: string;
+  nameEn?: string;
+  category: string;
+  ingredients: Array<{ name: string; grams: number }>;
+  steps: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  fiber?: number;
+  image?: string | null;
+}
+
+export const RECIPE_SEED: RecipeSeed[] = [
+  {
+    name: "شوفان بروتين الفطور",
+    nameEn: "Protein Oatmeal",
+    category: "إفطار",
+    ingredients: [{ name: "شوفان (جاف)", grams: 60 }, { name: "حليب خالي الدسم", grams: 250 }, { name: "موز", grams: 100 }, { name: "واي بروتين (مسحوق)", grams: 30 }],
+    steps: "سخّن الحليب على نار هادئة، أضف الشوفان وقلّب 3 دقائق حتى يتكاثف.\nانقله إلى طبق عميق، أضف الزبادي أو سكوب البروتين وقلّب جيداً.\nزيّن بشرائح الموز ورشة قرفة اختيارية.",
+    calories: 430, protein: 40, carbs: 65, fats: 9, fiber: 8,
+  },
+  {
+    name: "دجاج مشوي بالأرز البني",
+    nameEn: "Grilled Chicken rice bowl",
+    category: "غداء",
+    ingredients: [{ name: "صدر دجاج مشوي", grams: 200 }, { name: "أرز بني مطبوخ", grams: 250 }, { name: "بروكلي مطبوخ", grams: 150 }],
+    steps: "تبّل صدر الدجاج بالملح والفلفل الأسود والثوم والليمون لمدة 30 دقيقة.\nاشوِ الدجاج 6-7 دقائق على كل وجه حتى ينضج تماماً.\nقدّمه مع الأرز البني والبروكلي المطهو على البخار.",
+    calories: 520, protein: 48, carbs: 58, fats: 9, fiber: 7,
+  },
+  {
+    name: "زبادي يوناني بالتوت والشيا",
+    nameEn: "Greek Yogurt Bowl",
+    category: "سناك",
+    ingredients: [{ name: "زبادي يوناني سادة", grams: 200 }, { name: "فراولة", grams: 100 }, { name: "بذور الشيا", grams: 10 }],
+    steps: "اخلط الزبادي اليوناني مع بذور الشيا واتركه 10 دقائق.\nأضف قطع الفراولة الطازجة قبل التقديم.",
+    calories: 220, protein: 20, carbs: 22, fats: 7, fiber: 6,
+  },
+  {
+    name: "سلطة تونه دايت",
+    nameEn: "Diet Tuna Salad",
+    category: "غداء",
+    ingredients: [{ name: "تونة معلبة بالماء", grams: 150 }, { name: "خس", grams: 100 }, { name: "خيار", grams: 100 }, { name: "طماطم", grams: 100 }, { name: "زيت زيتون", grams: 10 }],
+    steps: "صفّ التونة من مائها جيداً.\nقطّع الخضروات واخلطها مع التونة.\nأضف زيت الزيتون وعصير الليمون والملح.",
+    calories: 285, protein: 36, carbs: 9, fats: 11, fiber: 4,
+  },
+  {
+    name: "عجة بياض البيض بالخضروات",
+    nameEn: "Egg White Omelette",
+    category: "إفطار",
+    ingredients: [{ name: "بياض بيض", grams: 250 }, { name: "سبانخ مطبوخة", grams: 80 }, { name: "مشروم (فطر)", grams: 80 }, { name: "طماطم", grams: 60 }],
+    steps: "اخفق بياض البيض بالملح والفلفل.\nشوّح الخضروات بملعقة زيت صغيرة.\nأضف البياض واطهِ على نار هادئة حتى يتماسك.",
+    calories: 185, protein: 28, carbs: 8, fats: 4, fiber: 3,
+  },
+  {
+    name: "بان كيك الشوفان دايت",
+    nameEn: "Diet Oat Pancakes",
+    category: "حلويات دايت",
+    ingredients: [{ name: "شوفان (جاف)", grams: 80 }, { name: "موز", grams: 100 }, { name: "بيض مسلوق", grams: 100 }],
+    steps: "اخلط الشوفان والموز والبيض في الخلاط حتى عجينة ناعمة.\nاسكب دوائر صغيرة على مقلاة غير لاصقة 2 دقيقة لكل وجه.",
+    calories: 380, protein: 16, carbs: 60, fats: 9, fiber: 7,
+  },
+  {
+    name: "سمك سلمون بالبطاطا الحلوة",
+    nameEn: "Salmon & Sweet Potato",
+    category: "عشاء",
+    ingredients: [{ name: "سمك سلمون", grams: 180 }, { name: "بطاطا حلوة مشوية", grams: 250 }, { name: "خس", grams: 100 }],
+    steps: "اصطاد القطع على الشواية 4-5 دقائق لكل وجه بملح وليمون فقط.\nقدّمها مع البطاطا الحلوة المشوية وسلطة خضراء.",
+    calories: 480, protein: 38, carbs: 45, fats: 18, fiber: 7,
+  },
+];
+
 export const EXERCISE_SEED: ExerciseSeed[] = [
   // ===== صدر =====
   ["بنش برس بالبار", "صدر"],

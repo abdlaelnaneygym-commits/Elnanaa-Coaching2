@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "#about", label: "الكابتن" },
   { href: "#transformations", label: "التحوّلات" },
   { href: "#packages", label: "الباقات" },
+  { href: "#recipes", label: "الوصفات" },
   { href: "#register", label: "اشترك الآن" },
 ];
 

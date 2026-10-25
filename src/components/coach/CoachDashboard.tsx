@@ -7,6 +7,7 @@ import {
   Calculator,
   Dumbbell,
   ImagePlus,
+  BookOpen,
   ImageIcon,
   KeyRound,
   LayoutDashboard,
@@ -28,6 +29,7 @@ import SettingsPanel from "./SettingsPanel";
 import FoodsLibrary from "./FoodsLibrary";
 import HeroManager from "./HeroManager";
 import PlansView from "./PlansView";
+import RecipesManager from "./RecipesManager";
 import TransformationsManager from "./TransformationsManager";
 import WorkoutBuilder from "./WorkoutBuilder";
 
@@ -38,6 +40,7 @@ type Section =
   | "foods"
   | "exercises"
   | "transformations"
+  | "recipes"
   | "settings"
   | "hero";
 
@@ -53,6 +56,7 @@ const NAV: { id: Section; label: string; icon: typeof BarChart3 }[] = [
   { id: "foods", label: "مكتبة الأغذية", icon: UtensilsCrossed },
   { id: "exercises", label: "مكتبة التمارين", icon: Dumbbell },
   { id: "transformations", label: "التحوّلات", icon: ImagePlus },
+  { id: "recipes", label: "كتاب الوصفات", icon: BookOpen },
   { id: "settings", label: "كلمة السر", icon: KeyRound },
   { id: "hero", label: "صورة الواجهة", icon: ImageIcon },
 ];
@@ -286,6 +290,7 @@ function DashboardShell({
       {section === "foods" && <FoodsLibrary headers={headers} />}
       {section === "exercises" && <ExercisesLibrary headers={headers} />}
       {section === "transformations" && <TransformationsManager headers={headers} />}
+      {section === "recipes" && <RecipesManager headers={headers} />}
       {section === "settings" && (
         <SettingsPanel
           headers={headers}

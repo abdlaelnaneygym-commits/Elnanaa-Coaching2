@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
 import Packages from "@/components/Packages";
+import Recipes from "@/components/Recipes";
 import Registration from "@/components/Registration";
 import Transformations from "@/components/Transformations";
 import { db } from "@/db";
@@ -42,6 +43,7 @@ export default async function HomePage() {
         <About />
         <Transformations initial={transformationRows} />
         <Packages />
+        <Recipes />
         <Registration />
       </main>
       <Footer />
