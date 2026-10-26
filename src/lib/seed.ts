@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { exercises, foods, recipes, transformations } from "@/db/schema";
+import { ensureSchema } from "@/lib/ensure-schema";
 import {
   EXERCISE_SEED,
   FOOD_SEED,
@@ -15,6 +16,9 @@ async function count(table: typeof foods | typeof exercises | typeof transformat
 }
 
 async function doSeed() {
+  // تأكيد وجود Schema كاملاً أولاً (آمن — إضافي فقط)
+  await ensureSchema();
+
   // الأغذية الأساسية — مرة واحدة عند الجدول فارغ
   if ((await count(foods)) === 0) {
     await db.insert(foods).values(

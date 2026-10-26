@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { dietPlans } from "@/db/schema";
 import { isCoachAuthorized, unauthorized } from "@/lib/coach-auth";
+import { ensureSchema } from "@/lib/ensure-schema";
 import type { Meal } from "@/lib/plans";
 import { desc } from "drizzle-orm";
 
@@ -43,6 +44,7 @@ function validMeals(meals: unknown): meals is Meal[] {
 
 export async function GET(req: Request) {
   if (!(await isCoachAuthorized(req))) return unauthorized();
+  await ensureSchema();
   try {
     const rows = await db
       .select()

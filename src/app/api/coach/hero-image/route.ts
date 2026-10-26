@@ -1,6 +1,7 @@
 import { isCoachAuthorized, unauthorized } from "@/lib/coach-auth";
 import { deleteSetting, getSetting, setSetting } from "@/lib/settings";
 import { readDataUrlField } from "@/lib/uploads";
+import { ensureSchema } from "@/lib/ensure-schema";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ const HERO_KEY = "hero_image";
 /** قراءة صورة الواجهة الحالية المخصصة (للوحة المدرب) */
 export async function GET(req: Request) {
   if (!(await isCoachAuthorized(req))) return unauthorized();
+  await ensureSchema();
   const image = await getSetting(HERO_KEY);
   return Response.json({ ok: true, data: { image, isCustom: Boolean(image) } });
 }

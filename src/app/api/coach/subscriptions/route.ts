@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { subscriptions } from "@/db/schema";
 import { isCoachAuthorized, unauthorized } from "@/lib/coach-auth";
+import { ensureSchema } from "@/lib/ensure-schema";
 import { desc, eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
@@ -8,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   if (!(await isCoachAuthorized(req))) return unauthorized();
+  await ensureSchema();
   try {
     const rows = await db
       .select()

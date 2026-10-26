@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { calculations } from "@/db/schema";
 import { isCoachAuthorized, unauthorized } from "@/lib/coach-auth";
+import { ensureSchema } from "@/lib/ensure-schema";
 import { desc, eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
 /** قائمة طلبات حاسبة السعرات بالنتائج الكاملة — للمدرب فقط */
 export async function GET(req: Request) {
   if (!(await isCoachAuthorized(req))) return unauthorized();
+  await ensureSchema(); // تأكيد وجود الأعمدة على أي قاعدة
   try {
     const rows = await db
       .select()
